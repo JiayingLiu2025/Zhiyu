@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>知遇</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel-strong: rgba(255, 255, 255, 0.84);
+      --line: rgba(0, 0, 0, 0.14);
+      --soft: rgba(0, 0, 0, 0.04);
+      --text: #1c2422;
+      --muted: #5d6761;
+      --accent: #2f6b4f;
+      --accent-2: #d38a4f;
+      --warn: #8a5a00;
+      --danger: #a23b32;
+      --shadow: none;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.70)),
+        url("/static/chapter2-bg.jpg") center center / cover fixed no-repeat;
+      overflow-y: auto;
+    }
+
+    .bg-layer,
+    .wash-layer {
+      display: none;
+    }
+
+    .bg-layer {
+      background:
+        linear-gradient(180deg, rgba(3, 8, 13, 0.18), rgba(3, 8, 13, 0.34)),
+        url("/static/chapter2-bg.jpg") center center / cover no-repeat;
+      opacity: 0.92;
+      transform: scale(1.03);
+      filter: saturate(1.02) contrast(1.02) brightness(0.96);
+    }
+
+    .wash-layer {
+      background:
+        linear-gradient(180deg, rgba(6, 11, 18, 0.12), rgba(6, 11, 18, 0.54)),
+        radial-gradient(1200px 500px at 50% 0%, rgba(127, 182, 122, 0.08), transparent 70%);
+      z-index: -1;
+    }
+
+    .shell,
+    .hero,
+    .panel {
+      position: relative;
+      z-index: 1;
+    }
+
+    .shell {
+      width: min(1100px, calc(100vw - 24px));
+      margin: 0 auto;
+      padding: 14px 0 36px;
+    }
+
+    .hero {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid rgba(143, 209, 107, 0.30);
+      background: rgba(0, 0, 0, 0.04);
+      color: #111111;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 44px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      max-width: 58ch;
+      line-height: 1.6;
+    }
+
+    .status {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.03);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .chip.active {
+      border-color: rgba(143, 209, 107, 0.35);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .chip.locked {
+      border-color: rgba(255, 208, 122, 0.28);
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    .btn {
+      position: relative;
+      z-index: 2;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary {
+      background: #111111;
+      border-color: #111111;
+      color: #ffffff;
+    }
+    .btn.ghost {
+      background: transparent;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.85fr);
+      gap: 14px;
+      margin-top: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .panel-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .story-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .story {
+      perspective: 1100px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .story.fixed {
+      border-color: rgba(255, 208, 122, 0.25);
+    }
+
+    .story-flip {
+      display: grid;
+      transform-style: preserve-3d;
+      transition: transform .56s cubic-bezier(.2, .75, .25, 1);
+    }
+
+    .story.flipped .story-flip {
+      transform: rotateY(180deg);
+    }
+
+    .story-face {
+      grid-area: 1 / 1;
+      display: grid;
+      gap: 10px;
+      min-height: 230px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--panel-strong);
+      backface-visibility: hidden;
+    }
+
+    .story-back {
+      align-content: center;
+      transform: rotateY(180deg);
+      background:
+        linear-gradient(145deg, rgba(47, 107, 79, 0.09), rgba(211, 138, 79, 0.12)),
+        var(--panel-strong);
+    }
+
+    .story-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .story h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .story-field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .field-label {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .story-field p {
+      margin: 0;
+    }
+
+    .story-source {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .story-source a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .story-source a:hover {
+      text-decoration: underline;
+    }
+
+    .reason-title {
+      margin: 0;
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .reason-copy {
+      margin: 0;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .meta small {
+      color: var(--muted);
+    }
+
+    .story p {
+      margin: 0;
+      color: #222222;
+      line-height: 1.55;
+    }
+
+    .story .note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .score {
+      display: grid;
+      gap: 6px;
+    }
+
+    .meter {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .topic {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .topic.active {
+      border-color: rgba(143, 209, 107, 0.34);
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .topic.locked {
+      border-color: rgba(255, 208, 122, 0.25);
+      background: rgba(0, 0, 0, 0.05);
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    .form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fields {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(122, 199, 255, 0.45);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .trace {
+      display: grid;
+      gap: 16px;
+    }
+
+    .trace-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .trace-toolbar h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .trace-toolbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .icon-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .icon-btn:hover {
+      transform: rotate(28deg);
+      border-color: rgba(47, 107, 79, 0.5);
+      background: #ffffff;
+    }
+
+    .icon-btn:focus-visible,
+    .btn:focus-visible,
+    .topic:focus-visible {
+      outline: 3px solid rgba(211, 138, 79, 0.28);
+      outline-offset: 2px;
+    }
+
+    .icon-btn svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .exploration-board {
+      position: relative;
+      overflow: hidden;
+      min-height: 520px;
+      border: 1px solid rgba(47, 107, 79, 0.18);
+      border-radius: 8px;
+      background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(247, 239, 218, 0.64)),
+        url("/static/chapter2-bg.jpg") center / cover;
+    }
+
+    .exploration-board::before,
+    .exploration-board::after {
+      position: absolute;
+      z-index: 0;
+      color: rgba(47, 107, 79, 0.16);
+      font-size: 84px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .exploration-board::before {
+      content: "✦";
+      top: 28px;
+      left: 10%;
+      transform: rotate(-12deg);
+    }
+
+    .exploration-board::after {
+      content: "·  ·  ·";
+      right: 8%;
+      bottom: 30px;
+      font-size: 34px;
+      letter-spacing: 10px;
+      transform: rotate(-18deg);
+    }
+
+    .board-caption {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 18px 20px 0;
+    }
+
+    .board-caption strong {
+      font-size: 15px;
+    }
+
+    .board-caption span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .path-stage {
+      position: relative;
+      z-index: 1;
+      min-height: 460px;
+      margin: 0 18px;
+    }
+
+    .empty-trail {
+      position: absolute;
+      left: 50%;
+      top: 45%;
+      z-index: 3;
+      display: grid;
+      gap: 6px;
+      max-width: 250px;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .empty-trail strong {
+      color: var(--accent);
+      font-size: 17px;
+    }
+
+    .empty-trail span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .path-stage::before {
+      content: "";
+      position: absolute;
+      left: 10%;
+      top: 80%;
+      width: 78%;
+      height: 2px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(47, 107, 79, 0.22) 0 7px,
+        transparent 7px 16px
+      );
+      transform: rotate(-28deg);
+      transform-origin: left center;
+      opacity: 0.7;
+    }
+
+    .trail-origin,
+    .pet-stop,
+    .paw-step {
+      position: absolute;
+      left: var(--x, 50%);
+      top: var(--y, 50%);
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+    }
+
+    .trail-origin {
+      z-index: 3;
+      left: 9%;
+      top: 86%;
+      display: grid;
+      gap: 4px;
+      transform: translate(0, -50%);
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .trail-origin strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .paw-step {
+      z-index: 3;
+      transition: transform .22s ease;
+    }
+
+    .paw-step:hover {
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(1.06);
+    }
+
+    .paw-print {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      width: max-content;
+      min-height: 72px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--accent);
+    }
+
+    .paw-print::before {
+      content: "👣";
+      display: block;
+      flex: 0 0 auto;
+      font-size: clamp(42px, 5vw, 58px);
+      line-height: 1;
+      filter: hue-rotate(92deg) saturate(1.45) brightness(0.92);
+      transform: rotate(-8deg);
+      text-shadow: 0 5px 10px rgba(45, 63, 49, 0.15);
+    }
+
+    .paw-text {
+      position: relative;
+      z-index: 2;
+      max-width: 138px;
+      padding: 9px 11px;
+      border: 1px solid rgba(211, 138, 79, 0.55);
+      border-radius: 999px;
+      background: rgba(255, 246, 215, 0.94);
+      box-shadow: 0 6px 14px rgba(45, 63, 49, 0.1);
+      overflow-wrap: anywhere;
+      text-align: center;
+      font-size: clamp(12px, 1.35vw, 15px);
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .paw-toe {
+      display: none;
+    }
+
+    .paw-toe.one { left: 19%; transform: rotate(-18deg); }
+    .paw-toe.two { left: 39%; top: -11px; }
+    .paw-toe.three { right: 20%; transform: rotate(18deg); }
+
+    .pet-stop {
+      z-index: 4;
+      left: 88%;
+      top: 11%;
+      display: grid;
+      justify-items: center;
+      gap: 2px;
+      transform: translate(-50%, -50%) rotate(8deg);
+    }
+
+    .pet {
+      width: clamp(84px, 13vw, 126px);
+      height: auto;
+      filter: drop-shadow(0 8px 8px rgba(45, 63, 49, 0.16));
+    }
+
+    .pet-name {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pet-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .trace-item {
+      border-top: 1px solid var(--line);
+      padding: 12px 0 0;
+    }
+
+    .trace-item h3 {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .trace-item p {
+      margin: 0;
+      color: #222222;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .trace-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .trace-insights {
+      display: grid;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .trace-insights::before {
+      content: "这次探索留下的线索";
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+      .status { justify-content: flex-start; }
+    }
+
+    @media (max-width: 620px) {
+      .exploration-board { min-height: 470px; }
+      .path-stage { min-height: 410px; margin: 0 8px; }
+      .path-stage::before {
+        left: 12%;
+        top: 78%;
+        width: 74%;
+        transform: rotate(-35deg);
+      }
+      .trail-origin { left: 6%; top: 84%; }
+      .pet-stop { left: 84%; top: 10%; }
+      .paw-print { min-height: 64px; }
+      .paw-text { max-width: 112px; padding: 8px 9px; }
+      .paw-step:nth-of-type(2) { --x: 26% !important; }
+      .paw-step:nth-of-type(3) { --x: 44% !important; }
+      .paw-step:nth-of-type(4) { --x: 62% !important; }
+      .paw-step:nth-of-type(5) { --x: 76% !important; }
+      .empty-pet { left: 74%; top: 82%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="wash-layer"></div>
+  <div class="shell">
+    <section class="hero">
+      <div class="topline">
+        <div class="brand">
+          <h1>知遇</h1>
+        </div>
+        <div class="status" id="status-row"></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" type="button" data-view="push">推送</button>
+        <button class="btn ghost" type="button" id="reload-btn">刷新</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>当前推荐</h2>
+            <p>每张卡都拆成关键词、内容标题和内容，选择后会翻面解释推荐理由。</p>
+          </div>
+          <div class="score" id="score-box"></div>
+        </div>
+        <div class="panel-body">
+          <div class="story-list" id="feed"></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>边界</h2>
+              <p><span id="boundary-batch-name">先从兴趣说起</span> · 用户自己选择要避开的方向。</p>
+            </div>
+            <button class="icon-btn" id="rotate-boundaries-btn" type="button" title="切换边界关键词" aria-label="切换边界关键词">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 10"></path>
+                <path d="M3 4v6h6"></path>
+                <path d="M4 13a8.1 8.1 0 0 0 14.9 4L21 14"></path>
+                <path d="M21 20v-6h-6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="panel-body">
+            <div class="category-list" id="categories"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>补充兴趣</h2>
+              <p>加一条你想主动探索的内容。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form class="form" id="catalog-form">
+              <div class="fields">
+                <div class="field">
+                  <label for="title">标题</label>
+                  <input id="title" name="title" required>
+                </div>
+                <div class="row">
+                  <div class="field">
+                    <label for="category">分类</label>
+                    <input id="category" name="category" required>
+                  </div>
+                  <div class="field">
+                    <label for="vibe">气质</label>
+                    <input id="vibe" name="vibe" required>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="summary">简介</label>
+                  <textarea id="summary" name="summary" required></textarea>
+                </div>
+                <div class="field">
+                  <label for="reason">原因</label>
+                  <textarea id="reason" name="reason" required></textarea>
+                </div>
+                <div class="row">
+                  <div class="field">
+                    <label for="base">基础分</label>
+                    <input id="base" name="base" type="number" min="0" max="100" value="80">
+                  </div>
+                  <div class="field">
+                    <label>操作</label>
+                    <button class="btn primary" type="submit">保存</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:14px;">
+      <div class="panel-head">
+        <div>
+          <h2>轨迹</h2>
+          <p>从最开始探索的关键词，一路走到最新发现。</p>
+        </div>
+        <button class="icon-btn" id="rotate-keywords-btn" type="button" title="更换一批关键词" aria-label="更换一批关键词">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 11a8.1 8.1 0 0 0-14.9-4L3 10"></path>
+            <path d="M3 4v6h6"></path>
+            <path d="M4 13a8.1 8.1 0 0 0 14.9 4L21 14"></path>
+            <path d="M21 20v-6h-6"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="trace">
+          <div class="exploration-board">
+            <div class="board-caption">
+              <strong id="keyword-batch-name">边界与靠近</strong>
+              <span id="keyword-source">认知科学 × 人机交互</span>
+            </div>
+            <div class="path-stage" id="path-stage" aria-live="polite"></div>
+          </div>
+          <div class="trace-insights" id="trace"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note" id="footer-note"></div>
+  </div>
+
+  <script>
+    const state = {
+      bootstrap: null,
+      feed: null,
+      trace: null,
+      boundaries: null,
+      keywordBatch: Number(localStorage.getItem("active-map-keyword-batch") || 0),
+      boundaryBatch: Number(localStorage.getItem("active-map-boundary-batch") || 0),
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    async function api(url, options = {}) {
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "请求失败");
+      }
+      return data;
+    }
+
+    function viewLabel(view) {
+      return view === "map" ? "地图" : "推送";
+    }
+
+    function renderStatus() {
+      const items = [];
+      items.push(`<span class="chip active">视图：${viewLabel(state.bootstrap.view)}</span>`);
+      items.push(`<span class="chip">固定：${state.bootstrap.lockedTopics.length}</span>`);
+      items.push(`<span class="chip">已看：${state.bootstrap.seen.length}</span>`);
+      items.push(`<span class="chip locked">数据库：SQLite</span>`);
+      $("status-row").innerHTML = items.join("");
+    }
+
+    function renderScore() {
+      const model = state.feed.model;
+      $("score-box").innerHTML = `
+        <div style="font-size:12px;color:var(--muted);">探索 / 稳定</div>
+        <div class="meter" aria-hidden="true"><span style="width:${model.exploration}%"></span></div>
+        <div style="font-size:12px;color:var(--muted);">${model.exploration}% / ${model.familiar}%</div>
+      `;
+    }
+
+    function renderFeed() {
+      $("feed").innerHTML = state.feed.items.map((item) => {
+        const fixed = Boolean(item.fixed);
+        const online = item.origin === "online";
+        const sourceLabel = online ? "在线更新" : "本地引导";
+        const sourceLink = online && item.source_url
+          ? `<a href="${escapeAttr(item.source_url)}" target="_blank" rel="noreferrer">查看来源</a>`
+          : "";
+        return `
+          <article class="story ${fixed ? "fixed" : ""}">
+            <div class="story-flip">
+              <div class="story-face story-front">
+                <div class="story-field">
+                  <span class="field-label">关键词</span>
+                  <div class="meta">
+                    <span class="chip">${escapeHtml(item.category)}</span>
+                    ${fixed ? '<span class="chip locked">固定兴趣</span>' : ''}
+                  </div>
+                </div>
+                <div class="story-field">
+                  <span class="field-label">内容标题</span>
+                  <h3>${escapeHtml(item.title)}</h3>
+                </div>
+                <div class="story-field">
+                  <span class="field-label">内容</span>
+                  <p>${escapeHtml(item.summary)}</p>
+                </div>
+                <div class="story-source">
+                  <span>${sourceLabel}${item.published_at ? ` · ${escapeHtml(item.published_at)}` : ""}</span>
+                  ${sourceLink}
+                </div>
+                <div class="actions">
+                  <button class="btn primary" data-action="keep" data-title="${escapeAttr(item.title)}" data-category="${escapeAttr(item.category)}">保留</button>
+                  <button class="btn" data-action="skip" data-title="${escapeAttr(item.title)}" data-category="${escapeAttr(item.category)}" ${fixed ? "disabled" : ""}>略过</button>
+                </div>
+              </div>
+              <div class="story-face story-back">
+                <span class="field-label">推荐解释</span>
+                <h3 class="reason-title">${escapeHtml(kindLabel(item.category))}为什么出现在这里</h3>
+                <p class="reason-copy">${escapeHtml(item.reason)}</p>
+                <small class="note">这次选择会影响下一轮内容的靠近方向。</small>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      $("feed").querySelectorAll("[data-action]").forEach((btn) => {
+        btn.addEventListener("click", () => handleEvent(
+          btn.dataset.action,
+          btn.dataset.title,
+          btn.dataset.category,
+          btn.closest(".story")
+        ));
+      });
+    }
+
+    function kindLabel(category) {
+      return `${category}关键词`;
+    }
+
+    function renderCategories() {
+      const locked = new Set(state.bootstrap.lockedTopics);
+      const disliked = new Set(state.bootstrap.disliked);
+      const boundaryMap = state.boundaries.boundaryMap;
+      $("boundary-batch-name").textContent = boundaryMap.name;
+      $("categories").innerHTML = boundaryMap.keywords.map((name) => {
+        const isLocked = locked.has(name);
+        const isActive = disliked.has(name);
+        return `
+          <button
+            class="topic ${isLocked ? "locked" : isActive ? "active" : ""}"
+            data-category="${escapeAttr(name)}"
+            ${isLocked ? "disabled" : ""}
+            title="${isLocked ? "固定" : "可切换"}"
+          >${escapeHtml(name)} ${isLocked ? "固定" : isActive ? "已选中" : ""}</button>
+        `;
+      }).join("");
+
+      $("categories").querySelectorAll("[data-category]").forEach((btn) => {
+        btn.addEventListener("click", () => toggleBoundary(btn.dataset.category));
+      });
+    }
+
+    function renderTrace() {
+      const keywordMap = state.trace.keywordMap;
+      const keywords = keywordMap.keywords || [];
+      const height = Math.max(410, keywords.length * 92 + 80);
+      const positions = keywords.map((_, index) => {
+        const progress = keywords.length <= 1 ? 0 : index / (keywords.length - 1);
+        const x = 13 + progress * 69 + (index % 2 ? 4 : -2);
+        const y = height - 78 - progress * (height - 142);
+        const rotation = index % 2 ? 12 : -12;
+        return [`${Math.min(86, x)}%`, `${Math.max(42, y)}px`, `${rotation}deg`];
+      });
+
+      $("keyword-batch-name").textContent = keywordMap.name;
+      $("keyword-source").textContent = keywordMap.source;
+      $("path-stage").style.height = `${height}px`;
+      $("path-stage").innerHTML = keywords.length
+        ? `
+        <div class="trail-origin">
+          <span>起点 · 最开始探索</span>
+          <strong>${escapeHtml(keywords[0])}</strong>
+        </div>
+        ${keywords.map((keyword, index) => {
+          const [x, y, r] = positions[index] || positions[positions.length - 1];
+          return `
+            <div class="paw-step" style="--x:${x};--y:${y};--r:${r};">
+              <span class="paw-print">
+                <i class="paw-toe one"></i>
+                <i class="paw-toe two"></i>
+                <i class="paw-toe three"></i>
+                <span class="paw-text">${escapeHtml(keyword)}</span>
+              </span>
+            </div>
+          `;
+        }).join("")}
+        <div class="pet-stop">
+          <svg class="pet" viewBox="0 0 140 126" role="img" aria-label="地下室探索宠物">
+            <path d="M37 35 25 16l22 8c7-4 18-6 28-3l18-13-1 25c11 9 16 24 14 43-2 23-16 34-43 34S20 99 18 76c-2-18 4-32 19-41Z" fill="#e5eadc" stroke="#23322c" stroke-width="3.5" stroke-linejoin="round"></path>
+            <path d="M38 83c9 9 20 13 34 13 14 0 25-4 33-13" fill="none" stroke="#a4b6a1" stroke-width="3" stroke-linecap="round"></path>
+            <circle cx="48" cy="57" r="4" fill="#23322c"></circle>
+            <circle cx="82" cy="57" r="4" fill="#23322c"></circle>
+            <path d="M62 66c3-3 8-3 11 0M68 66v7M61 73c4 5 10 5 14 0" fill="none" stroke="#23322c" stroke-width="3" stroke-linecap="round"></path>
+            <path d="M98 45c10 2 17 9 18 19-7-4-14-6-21-5Z" fill="#d38a4f" stroke="#23322c" stroke-width="3"></path>
+            <circle cx="106" cy="51" r="3" fill="#fff4d5"></circle>
+            <path d="M36 105v11M91 105v11" stroke="#23322c" stroke-width="4" stroke-linecap="round"></path>
+          </svg>
+          <span class="pet-name">地下室</span>
+          <span class="pet-subtitle">最新探索的关键词</span>
+        </div>
+      `
+        : `
+        <div class="empty-trail">
+          <strong>还没有脚印</strong>
+          <span>先在上面的推荐里保留或略过一条内容，地下室就会记住这个关键词。</span>
+        </div>
+        <div class="pet-stop empty-pet">
+          <svg class="pet" viewBox="0 0 140 126" role="img" aria-label="地下室探索宠物">
+            <path d="M37 35 25 16l22 8c7-4 18-6 28-3l18-13-1 25c11 9 16 24 14 43-2 23-16 34-43 34S20 99 18 76c-2-18 4-32 19-41Z" fill="#e5eadc" stroke="#23322c" stroke-width="3.5" stroke-linejoin="round"></path>
+            <circle cx="48" cy="57" r="4" fill="#23322c"></circle>
+            <circle cx="82" cy="57" r="4" fill="#23322c"></circle>
+            <path d="M62 66c3-3 8-3 11 0M68 66v7M61 73c4 5 10 5 14 0" fill="none" stroke="#23322c" stroke-width="3" stroke-linecap="round"></path>
+          </svg>
+          <span class="pet-name">地下室</span>
+        </div>
+      `;
+
+      $("trace").innerHTML = state.trace.items.map((item) => `
+        <div class="trace-item">
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.copy)}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderFooter() {
+      const updatedAt = Number(state.bootstrap.onlineUpdatedAt || 0);
+      const onlineText = updatedAt
+        ? `在线内容更新于 ${new Date(updatedAt * 1000).toLocaleString("zh-CN")}`
+        : "等待第一次在线内容同步";
+      $("footer-note").textContent = `${onlineText}。服务运行期间每 30 分钟自动更新一次。`;
+    }
+
+    async function load() {
+      const [bootstrap, feed, trace] = await Promise.all([
+        api(`/api/bootstrap?batch=${state.keywordBatch}`),
+        api(`/api/feed?batch=${state.keywordBatch}`),
+        api(`/api/trace?batch=${state.keywordBatch}`),
+      ]);
+      state.boundaries = await api(`/api/boundaries?batch=${state.boundaryBatch}`);
+      state.bootstrap = bootstrap;
+      state.feed = feed;
+      state.trace = trace;
+      renderStatus();
+      renderScore();
+      renderFeed();
+      renderCategories();
+      renderTrace();
+      renderFooter();
+    }
+
+    async function handleEvent(kind, title, category, card) {
+      await api("/api/event", {
+        method: "POST",
+        body: JSON.stringify({ kind, title, category }),
+      });
+      card.classList.add("flipped");
+      await new Promise((resolve) => window.setTimeout(resolve, 720));
+      await load();
+    }
+
+    async function toggleBoundary(category) {
+      await api("/api/boundaries/toggle", {
+        method: "POST",
+        body: JSON.stringify({ category }),
+      });
+      await load();
+    }
+
+    async function setView(view) {
+      await api("/api/view", {
+        method: "POST",
+        body: JSON.stringify({ view }),
+      });
+      await load();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function escapeAttr(text) {
+      return escapeHtml(text).replaceAll("`", "&#96;");
+    }
+
+    document.querySelectorAll("[data-view]").forEach((btn) => {
+      btn.addEventListener("click", () => setView(btn.dataset.view));
+    });
+
+    $("reload-btn").addEventListener("click", (event) => {
+      event.preventDefault();
+      window.location.reload();
+    });
+
+    $("rotate-keywords-btn").addEventListener("click", async () => {
+      state.keywordBatch = (state.keywordBatch + 1) % 4;
+      localStorage.setItem("active-map-keyword-batch", String(state.keywordBatch));
+      await load();
+    });
+
+    $("rotate-boundaries-btn").addEventListener("click", async () => {
+      state.boundaryBatch = (state.boundaryBatch + 1) % 3;
+      localStorage.setItem("active-map-boundary-batch", String(state.boundaryBatch));
+      await load();
+    });
+
+    window.setInterval(load, 5 * 60 * 1000);
+
+    $("catalog-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const payload = Object.fromEntries(new FormData(form).entries());
+      payload.base = Number(payload.base || 80);
+      await api("/api/catalog", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      form.reset();
+      $("base").value = 80;
+      await load();
+    });
+
+    load().catch((error) => {
+      $("feed").innerHTML = `<div class="trace-item"><h3>页面没起来</h3><p>${escapeHtml(error.message)}</p></div>`;
+    });
+  </script>
+</body>
+</html>
